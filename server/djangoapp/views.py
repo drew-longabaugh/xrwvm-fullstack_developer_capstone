@@ -32,7 +32,10 @@ def login_user(request):
 # Logout view
 def logout_request(request):
     logout(request)
-    return JsonResponse({"status": "Logged out"})
+    data = {"userName":""}
+    return JsonResponse(data)
+    #logout(request)
+    #return JsonResponse({"status": "Logged out"})
 
 # Registration view
 @csrf_protect

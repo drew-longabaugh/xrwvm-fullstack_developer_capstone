@@ -1,15 +1,10 @@
+/*jshint esversion: 8 */
 const express = require('express');
-/*jshint esversion: 8 */
 const mongoose = require('mongoose');
-/*jshint esversion: 8 */
 const fs = require('fs');
-/*jshint esversion: 8 */
-const  cors = require('cors');
-/*jshint esversion: 8 */
+const  cors = require; ('cors');
 const app = express();
-/*jshint esversion: 8 */
 const port = 3030;
-/*jshint esversion: 8 */
 app.use(cors());
 app.use(require('body-parser').urlencoded({ extended: false }));
 
@@ -20,7 +15,6 @@ mongoose.connect("mongodb://mongo_db:27017/",{'dbName':'dealershipsDB'});
 
 
 const Reviews = require('./review');
-
 const Dealerships = require('./dealership');
 const { error } = require('console');
 
@@ -97,18 +91,18 @@ app.get('/fetchDealer/:id', async (req, res) => {
 app.post('/insert_review', express.raw({ type: '*/*' }), async (req, res) => {
   data = JSON.parse(req.body);
   const documents = await Reviews.find().sort( { id: -1 } );
-  let new_id = documents[0]['id']+1;
+  let new_id = documents[0].id+1;
 
   const review = new Reviews({
 		"id": new_id,
-		"name": data['name'],
-		"dealership": data['dealership'],
-		"review": data['review'],
-		"purchase": data['purchase'],
-		"purchase_date": data['purchase_date'],
-		"car_make": data['car_make'],
-		"car_model": data['car_model'],
-		"car_year": data['car_year'],
+		"name": data.name,
+		"dealership": data.dealership,
+		"review": data.review,
+		"purchase": data.purchase,
+		"purchase_date": data.purchase_date,
+		"car_make": data.car_make,
+		"car_model": data.car_model,
+		"car_year": data.car_year,
 	});
 
   try {

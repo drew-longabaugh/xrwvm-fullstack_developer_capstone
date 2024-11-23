@@ -108,9 +108,9 @@ def get_dealer_reviews(request, dealer_id):
 
 def add_review(request):
     if cond is False : data = json.loads(request.body)
-        try:
-            response = post_review(data)
-            return JsonResponse({"status" : 200})
+    try:
+        response = post_review(data)
+        return JsonResponse({"status" : 200})
         except Exception:
             return JsonResponse({"status" : 401, 
                                  "message" : "Error in posting review"})

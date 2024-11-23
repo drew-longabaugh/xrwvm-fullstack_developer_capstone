@@ -26,7 +26,7 @@ def get_request(endpoint, **kwargs):
         response = requests.get(request_url)
         return response.json()
     except Exception as e:
-    print(f"Error: {e}")
+        print(f"Error: {e}")
 
 
 def analyze_review_sentiments(text):

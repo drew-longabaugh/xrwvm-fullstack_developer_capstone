@@ -1,15 +1,15 @@
 import requests
 import os
 from dotenv import load_dotenv
-from django.http import JsonResponse
-import json
 
 # Load environment variables
 load_dotenv()
 
 # Get the backend and sentiment analyzer URLs from environment variables
 backend_url = os.getenv('backend_url', default="http://localhost:3030")
-sentiment_analyzer_url = os.getenv('sentiment_analyzer_url', default="http://localhost:5050/")
+sentiment_analyzer_url = os.getenv('sentiment_analyzer_url',
+                                   default="http://localhost:5050/")
+
 
 # Function to make GET requests
 def get_request(endpoint, **kwargs):
@@ -17,9 +17,10 @@ def get_request(endpoint, **kwargs):
     if kwargs:
         # Format parameters if provided
         params = "&".join([f"{key}={value}" for key, value in kwargs.items()])
-    
+
     # Build the complete request URL
-    request_url = f"{backend_url}{endpoint}?{params}" if params else f"{backend_url}{endpoint}"
+    request_url = f"{backend_url}{endpoint}?{params}"
+    if params else f"{backend_url}{endpoint}"
 
     print(f"GET request to: {request_url}")
     try:
@@ -30,6 +31,7 @@ def get_request(endpoint, **kwargs):
     except requests.exceptions.RequestException as e:
         print(f"Error in GET request: {e}")
         return {"status": "Error", "message": str(e)}
+
 
 # Function to analyze sentiment of review text
 def analyze_review_sentiments(text):
@@ -42,6 +44,7 @@ def analyze_review_sentiments(text):
     except requests.exceptions.RequestException as err:
         print(f"Error in sentiment analysis request: {err}")
         return {"status": "Error", "message": str(err)}
+
 
 # Function to post a review to the backend
 def post_review(data_dict):
@@ -62,7 +65,8 @@ def post_review(data_dict):
         except ValueError:
             # If the response isn't JSON, return the plain response
             print(f"Response is not JSON: {response.text}")
-            return {"status": "error", "message": "Invalid JSON response", "data": response.text}
+            return {"status": "error", "message": "Invalid JSON response",
+                    "data": response.text}
     except requests.exceptions.RequestException as e:
         print(f"Error in POST request: {e}")
         return {"status": "error", "message": str(e)}

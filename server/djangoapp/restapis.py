@@ -16,7 +16,7 @@ sentiment_analyzer_url = os.getenv(
 
 def get_request(endpoint, **kwargs):
     params = ""
-    if(kwargs):
+    if (kwargs):
         for key, value in kwargs.items():
             params = params+key+"="+value+"&"
 
@@ -43,18 +43,20 @@ def analyze_review_sentiments(text):
 
 
 def add_review(request):
-    if request.method == "POST":  # Assuming POST method is required for adding reviews
+    if request.method == "POST":
+        # Assuming POST method is required for adding reviews
         try:
             data = json.loads(request.body)
-            response = post_review(data)  # Call your function to handle posting the review
-            return JsonResponse({"status": 200, "message": 
+            response = add_review(data)
+            # Call your function to handle posting the review
+            return JsonResponse({"status": 200, "message":
                                  "Review added successfully"})
         except json.JSONDecodeError:  # Handle JSON parsing errors
-            return JsonResponse({"status": 400, "message": 
+            return JsonResponse({"status": 400, "message":
                                  "Invalid JSON format"})
         except Exception as e:  # Catch other unexpected errors
             print(f"Error: {e}")
-            return JsonResponse({"status": 401, "message": 
+            return JsonResponse({"status": 401, "message":
                                  "Error in posting review"})
     else:
         return JsonResponse({"status": 403, "message": "Unauthorized"})

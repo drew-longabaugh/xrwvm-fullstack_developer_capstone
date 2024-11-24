@@ -20,9 +20,9 @@ def get_request(endpoint, **kwargs):
 
     # Build the complete request URL
     if params:
-            request_url = f"{backend_url}{endpoint}?{params}"
+        request_url = f"{backend_url}{endpoint}?{params}"
     else:
-            request_url = f"{backend_url}{endpoint}"
+        request_url = f"{backend_url}{endpoint}"
 
     print(f"GET request to: {request_url}")
     try:

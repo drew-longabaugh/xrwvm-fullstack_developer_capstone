@@ -27,4 +27,4 @@ class CarModel(models.Model):
 
     type= models.CharField(max_length=20, choices=CAR_MODEL_CHOICES)
     year= models.IntegerField
-    (validators=[MinValueValidator(2015), MaxValueValidator(2023)])
+    (validators= [MinValueValidator(2015), MaxValueValidator(2023)])

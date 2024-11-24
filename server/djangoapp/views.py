@@ -20,32 +20,19 @@ def login_user(request):
             password = data.get('password')
 
             if not username or not password:
-                return JsonResponse({"status": "Error", "message": 
-                                     "Missing 'userName' or 'password'"},
-                                    status=400)
+                return JsonResponse({"status": "Error", "message": "Missing 'userName' or 'password'"}, status=400)
 
             # Authenticate user
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                return JsonResponse({"userName": username,
-                                     "status": "Authenticated"})
+                return JsonResponse({"userName": username, "status": "Authenticated"})
             else:
-                return JsonResponse({"status": "Error", "message":
-                                     "Invalid username or password"},
-                                    status=401)
+                return JsonResponse({"status": "Error", "message": "Invalid username or password"}, status=401)
         except json.JSONDecodeError:
             logger.error("Invalid JSON format in login_user")
-            return JsonResponse({"status": "Error", "message":
-                                 "Invalid JSON format"}, status=400)
-    return JsonResponse({"status": "Error", "message":
-                         "Only POST method allowed"}, status=405)
-
-
-# Logout view
-def logout_request(request):
-    logout(request)
-    return JsonResponse({"userName": "", "status": "Logged out"})
+            return JsonResponse({"status": "Error", "message": "Invalid JSON format"}, status=400)
+    return JsonResponse({"status": "Error", "message": "Only POST method allowed"}, status=405)
 
 
 # Registration view
@@ -63,80 +50,23 @@ def registration(request):
 
             # Check for missing fields
             if not username or not password or not email:
-                return JsonResponse({"status": "Error", "message": 
-                                     "Missing required fields"}, status=400)
+                return JsonResponse({"status": "Error", "message": "Missing required fields"}, status=400)
 
             # Check if username or email already exists
             if User.objects.filter(username=username).exists():
-                return JsonResponse({"status": "Error", "message":
-                                     "Username already exists"}, status=400)
+                return JsonResponse({"status": "Error", "message": "Username already exists"}, status=400)
             if User.objects.filter(email=email).exists():
-                return JsonResponse({"status": "Error", "message":
-                                     "Email already registered"}, status=400)
+                return JsonResponse({"status": "Error", "message": "Email already registered"}, status=400)
 
             # Create user
-            user = User.objects.create_user(
-                username=username, password=password,
-                first_name=first_name, last_name=last_name, email=email)
+            user = User.objects.create_user(username=username, password=password,
+                                            first_name=first_name, last_name=last_name, email=email)
             login(request, user)
-            return JsonResponse({"status":
-                                 "Authenticated",
-                                 "userName": username})
+            return JsonResponse({"status": "Authenticated", "userName": username})
         except json.JSONDecodeError:
             logger.error("Invalid JSON format in registration")
-            return JsonResponse({"status": "Error", "message": 
-                                 "Invalid JSON format"}, status=400)
+            return JsonResponse({"status": "Error", "message": "Invalid JSON format"}, status=400)
         except Exception as e:
             logger.error(f"Unexpected error in registration: {e}")
-            return JsonResponse({"status": "Error", "message":
-                                 "Internal server error"}, status=500)
-    return JsonResponse({"status": "Error", "message":
-                         "Only POST method allowed"}, status=405)
-
-
-# Get dealerships view
-def get_dealerships(request, state="All"):
-    try:
-        endpoint = "/fetchDealers" if state ==
-        else f"/fetchDealers/{state}"
-        dealerships = get_request(endpoint)
-        return JsonResponse({"status": 200, "dealers": dealerships})
-    except Exception as e:
-        logger.error(f"Error fetching dealerships: {e}")
-        return JsonResponse({"status": "Error", "message":
-                             "Unable to fetch dealerships"}, status=500)
-
-
-# Get dealer details view
-def get_dealer_details(request, dealer_id):
-    if not dealer_id:
-        return JsonResponse({"status": 400, "message":
-                             "Dealer ID is required"})
-    try:
-        endpoint = f"/fetchDealer/{dealer_id}"
-        dealership = get_request(endpoint)
-        return JsonResponse({"status": 200, "dealer": dealership})
-    except Exception as e:
-        logger.error(f"Error fetching dealer details: {e}")
-        return JsonResponse({"status": "Error", "message":
-                             "Unable to fetch dealer details"}, status=500)
-
-
-# Get dealer reviews view
-def get_dealer_reviews(request, dealer_id):
-    if not dealer_id:
-        return JsonResponse({"status": 400,
-                             "message": "Dealer ID is required"})
-    try:
-        endpoint = f"/fetchReviews/dealer/{dealer_id}"
-        reviews = get_request(endpoint)
-        for review_detail in reviews:
-            sentiment_response =
-            analyze_review_sentiments(review_detail['review'])
-            review_detail['sentiment'] =
-            sentiment_response.get('sentiment', 'neutral')
-        return JsonResponse({"status": 200, "reviews": reviews})
-    except Exception as e:
-        logger.error(f"Error fetching dealer reviews: {e}")
-        return JsonResponse({"status": "Error", "message":
-                             "Unable to fetch dealer reviews"}, status=500)
+            return JsonResponse({"status": "Error", "message": "Internal server error"}, status=500)
+    return JsonResponse({"status": "Error", "message": "Only POST method allowed"}, status=405)

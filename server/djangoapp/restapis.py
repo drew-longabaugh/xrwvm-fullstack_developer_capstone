@@ -47,8 +47,6 @@ def add_review(request):
         # Assuming POST method is required for adding reviews
         try:
             data = json.loads(request.body)
-            response = add_review(data)
-            # Call your function to handle posting the review
             return JsonResponse({"status": 200, "message":
                                  "Review added successfully"})
         except json.JSONDecodeError:  # Handle JSON parsing errors

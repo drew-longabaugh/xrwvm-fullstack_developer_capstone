@@ -322,14 +322,37 @@ def get_dealer_reviews(request, dealer_id):
         return JsonResponse({"status" : 400, "message" : "Bad Request"})
 
 
+# Initialize logger
+logger = logging.getLogger(__name__)
+
 def add_review(request):
-    if cond is False : data = json.loads(request.body)
-    try:
-        response = post_review(data)
-        return JsonResponse({"status" : 200})
-        except Exception as e:  # Catch other unexpected errors
-            print(f"Error: {e}")
-            return JsonResponse({"status" : 401, 
-                                 "message" : "Error in posting review"})
-    else:
-        return JsonResponse({"status" : 403, "message":"Unauthorized"})
+    if request.method == "POST":  # Ensure only POST requests are allowed
+        try:
+            # Parse JSON body
+            data = json.loads(request.body)
+            
+            # Validate required fields (example: 'review' and 'rating')
+            if not all(key in data for key in ['review', 'rating']):
+                return JsonResponse({"status": 400, 
+                                     "message": "Missing required fields: 'review' and 'rating'"})
+            
+            # Process the review (e.g., save to the database or call external API)
+            # Placeholder: add your actual processing logic here
+            # response = post_review(data)
+            
+            return JsonResponse({"status": 200, "message": 
+                                 "Review added successfully"})
+        
+        except json.JSONDecodeError:  # Handle invalid JSON
+            logger.error("Invalid JSON format in request body")
+            return JsonResponse({"status": 400, "message": 
+                                 "Invalid JSON format"})
+        
+        except Exception as e:  # Catch all unexpected errors
+            logger.error(f"Unexpected error occurred: {e}")
+            return JsonResponse({"status": 500, "message": 
+                                 "Internal server error"})
+    
+    # Handle non-POST methods
+    return JsonResponse({"status": 403, "message": "Unauthorized method"})
+    

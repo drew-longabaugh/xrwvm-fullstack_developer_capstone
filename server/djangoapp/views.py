@@ -92,3 +92,86 @@ def registration(request):
                                  "Internal server error"}, status=500)
     return JsonResponse({"status": "Error", "message":
                          "Only POST method allowed"}, status=405)
+
+
+
+def logout_request(request):
+    """Handle user logout."""
+    logout(request)
+    return JsonResponse({"userName": ""})
+    
+    
+def get_cars(request):
+    """Fetch car models and makes."""
+    count = CarMake.objects.filter().count()
+
+    if count == 0:
+        initiate()
+
+    car_models = CarModel.objects.select_related('car_make')
+    cars = [
+        {
+            "CarModel": car_model.name,
+            "CarMake": car_model.car_make.name
+        }
+        for car_model in car_models
+    ]
+
+    return JsonResponse({"CarModels": cars})
+
+
+def get_dealerships(request, state="All"):
+    """Fetch dealerships."""
+    endpoint = (
+        f"/fetchDealers/{state}" if state != "All" else "/fetchDealers"
+    )
+
+    dealerships = get_request(endpoint)
+    logger.debug(f"Dealerships data received: {dealerships}")
+
+    if not dealerships:
+        logger.error("No dealerships found or data fetch error.")
+
+    return JsonResponse({"status": 200, "dealers": dealerships})
+
+
+def get_dealer_details(request, dealer_id):
+    """Fetch dealer details by ID."""
+    if dealer_id:
+        endpoint = f"/fetchDealer/{dealer_id}"
+        dealership = get_request(endpoint)
+        return JsonResponse({"status": 200, "dealer": dealership})
+    else:
+        return JsonResponse({"status": 400, "message": "Bad Request"})
+
+
+def get_dealer_reviews(request, dealer_id):
+    """Fetch reviews of a dealer."""
+    if dealer_id:
+        endpoint = f"/fetchReviews/dealer/{dealer_id}"
+        reviews = get_request(endpoint)
+
+        for review in reviews:
+            sentiment = analyze_review_sentiments(review['review'])
+            review['sentiment'] = sentiment['sentiment']
+
+        return JsonResponse({"status": 200, "reviews": reviews})
+    else:
+        return JsonResponse({"status": 400, "message": "Bad Request"})
+
+
+def add_review(request):
+    """Submit a review."""
+    if request.user.is_authenticated:
+        data = json.loads(request.body)
+        try:
+            post_review(data)
+            return JsonResponse({"status": 200})
+        except Exception as e:
+            logger.error(f"Error in posting review: {e}")
+            return JsonResponse({
+                "status": 401,
+                "message": "Error in posting review"
+            })
+    else:
+        return JsonResponse({"status": 403, "message": "Unauthorized"})

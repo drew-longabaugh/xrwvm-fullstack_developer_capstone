@@ -1,108 +1,126 @@
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import logging
 import json
 
 # Initialize logger
 logger = logging.getLogger(__name__)
 
-
 # Login view
 @csrf_exempt
 def login_user(request):
-    # Get username and password from request.POST dictionary
-    data = json.loads(request.body)
-    username = data['userName']
-    password = data['password']
-    # Try to check if provide credential can be authenticated
-    user = authenticate(username=username, password=password)
-    data = {"userName": username}
-    if user is not None:
-        # If user is valid, call login method to login current user
-        login(request, user)
-        data = {"userName": username, "status": "Authenticated"}
-    return JsonResponse(data)
-
+    if request.method == "POST":
+        try:
+            # Parse JSON body
+            data = json.loads(request.body)
+            username = data.get('userName')
+            password = data.get('password')
+            
+            if not username or not password:
+                return JsonResponse({"status": "Error", "message": 
+                                     "Missing 'userName' or 'password'"}, status=400)
+            
+            # Authenticate user
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return JsonResponse({"userName": username, "status": "Authenticated"})
+            else:
+                return JsonResponse({"status": "Error", "message": 
+                                     "Invalid username or password"}, status=401)
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON format in login_user")
+            return JsonResponse({"status": "Error", "message": 
+                                 "Invalid JSON format"}, status=400)
+    return JsonResponse({"status": "Error", "message": 
+                         "Only POST method allowed"}, status=405)
 
 # Logout view
 def logout_request(request):
     logout(request)
-    data = {"userName": ""}
-    return JsonResponse(data)
-
+    return JsonResponse({"userName": "", "status": "Logged out"})
 
 # Registration view
 @csrf_protect
 def registration(request):
     if request.method == "POST":
         try:
+            # Parse JSON body
             data = json.loads(request.body)
-            username = data.get('userName', '')
-            password = data.get('password', '')
+            username = data.get('userName')
+            password = data.get('password')
             first_name = data.get('firstName', '')
             last_name = data.get('lastName', '')
-            email = data.get('email', '')
+            email = data.get('email')
+
+            # Check for missing fields
+            if not username or not password or not email:
+                return JsonResponse({"status": "Error", "message": 
+                                     "Missing required fields"}, status=400)
 
             # Check if username or email already exists
             if User.objects.filter(username=username).exists():
-                return JsonResponse({"status": "Error", "message":
+                return JsonResponse({"status": "Error", "message": 
                                      "Username already exists"}, status=400)
             if User.objects.filter(email=email).exists():
-                return JsonResponse({"status": "Error", "message":
+                return JsonResponse({"status": "Error", "message": 
                                      "Email already registered"}, status=400)
 
             # Create user
             user = User.objects.create_user(
-                username=username,
-                password=password,
-                first_name=first_name,
-                last_name=last_name,
-                email=email,
-            )
+                username=username, password=password, 
+                first_name=first_name, last_name=last_name, email=email)
             login(request, user)
-            return JsonResponse({"status": "Authenticated",
-                                 "userName": username})
-        except (json.JSONDecodeError, KeyError):
-            return JsonResponse({"status": "Error", "message":
-                                 "Invalid request data"}, status=400)
-    return JsonResponse({"status": "Error", "message":
+            return JsonResponse({"status": "Authenticated", "userName": username})
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON format in registration")
+            return JsonResponse({"status": "Error", "message": 
+                                 "Invalid JSON format"}, status=400)
+        except Exception as e:
+            logger.error(f"Unexpected error in registration: {e}")
+            return JsonResponse({"status": "Error", "message": 
+                                 "Internal server error"}, status=500)
+    return JsonResponse({"status": "Error", "message": 
                          "Only POST method allowed"}, status=405)
 
-
+# Get dealerships view
 def get_dealerships(request, state="All"):
-    if (state == "All"):
-        endpoint = "/fetchDealers"
-    else:
-        endpoint = "/fetchDealers/"+state
-    dealerships = get_request(endpoint)
-    return JsonResponse({"status": 200, "dealers": dealerships})
+    try:
+        endpoint = "/fetchDealers" if state == "All" else f"/fetchDealers/{state}"
+        dealerships = get_request(endpoint)
+        return JsonResponse({"status": 200, "dealers": dealerships})
+    except Exception as e:
+        logger.error(f"Error fetching dealerships: {e}")
+        return JsonResponse({"status": "Error", "message": 
+                             "Unable to fetch dealerships"}, status=500)
 
-
+# Get dealer details view
 def get_dealer_details(request, dealer_id):
-    if (dealer_id):
-        endpoint = "/fetchDealer/"+str(dealer_id)
+    if not dealer_id:
+        return JsonResponse({"status": 400, "message": "Dealer ID is required"})
+    try:
+        endpoint = f"/fetchDealer/{dealer_id}"
         dealership = get_request(endpoint)
         return JsonResponse({"status": 200, "dealer": dealership})
-    else:
-        return JsonResponse({"status": 400, "message": "Bad Request"})
+    except Exception as e:
+        logger.error(f"Error fetching dealer details: {e}")
+        return JsonResponse({"status": "Error", "message": 
+                             "Unable to fetch dealer details"}, status=500)
 
-
+# Get dealer reviews view
 def get_dealer_reviews(request, dealer_id):
-    # if dealer id has been provided
-    if (dealer_id):
-        endpoint = "/fetchReviews/dealer/"+str(dealer_id)
+    if not dealer_id:
+        return JsonResponse({"status": 400, "message": "Dealer ID is required"})
+    try:
+        endpoint = f"/fetchReviews/dealer/{dealer_id}"
         reviews = get_request(endpoint)
         for review_detail in reviews:
-            response = analyze_review_sentiments(review_detail['review'])
-            print(response)
-            review_detail['sentiment'] = response['sentiment']
+            sentiment_response = analyze_review_sentiments(review_detail['review'])
+            review_detail['sentiment'] = sentiment_response.get('sentiment', 'neutral')
         return JsonResponse({"status": 200, "reviews": reviews})
-    else:
-        return JsonResponse({"status": 400, "message": "Bad Request"})
-
-
-# Initialize logger
-logger = logging.getLogger(__name__)
+    except Exception as e:
+        logger.error(f"Error fetching dealer reviews: {e}")
+        return JsonResponse({"status": "Error", "message": 
+                             "Unable to fetch dealer reviews"}, status=500)

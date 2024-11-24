@@ -322,16 +322,28 @@ def get_dealer_reviews(request, dealer_id):
         return JsonResponse({"status" : 400, "message" : "Bad Request"})
 
 
+from django.http import JsonResponse
+import json
+
 def add_review(request):
-    if cond is False : data = json.loads(request.body)
-    try:
-        response = post_review(data)
-        return JsonResponse({"status" : 200})
+    # Assuming POST request is required for adding reviews
+    if request.method == "POST":  
+        try:
+            # Parse JSON data from the request body
+            data = json.loads(request.body)
+            
+            # Call your function to handle posting the review
+            response = post_review(data)  
+
+            # Return success response
+            return JsonResponse({"status": 200, "message": "Review added successfully"})
+
+        except json.JSONDecodeError:  # Handle invalid JSON format errors
+            return JsonResponse({"status": 400, "message": "Invalid JSON format"})
+
         except Exception as e:  # Catch other unexpected errors
             print(f"Error: {e}")
-            return JsonResponse({"status" : 401, 
-                                 "message" : "Error in posting review"})
-    else:
-        return JsonResponse({"status" : 403, "message":"Unauthorized"})
+            return JsonResponse({"status": 500, "message": "Error in posting review"})
 
-
+    # Handle non-POST requests
+    return JsonResponse({"status": 403, "message": "Unauthorized"})

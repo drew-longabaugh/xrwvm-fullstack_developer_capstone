@@ -21,7 +21,9 @@ def login_user(request):
 
             if not username or not password:
                 return JsonResponse({"status": "Error",
-                                     "message": "Missing 'userName' or 'password'"}, status=400)
+                                     "message":
+                                     "Missing 'userName' or 'password'"},
+                                    status=400)
 
             # Authenticate user
             user = authenticate(username=username,

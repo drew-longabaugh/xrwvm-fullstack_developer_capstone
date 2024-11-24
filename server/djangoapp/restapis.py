@@ -19,7 +19,10 @@ def get_request(endpoint, **kwargs):
         params = "&".join([f"{key}={value}" for key, value in kwargs.items()])
 
     # Build the complete request URL
-    request_url = f"{backend_url}{endpoint}?{params}" if params else f"{backend_url}{endpoint}"
+    if params:
+      request_url = f"{backend_url}{endpoint}?{params}"
+    else:
+      request_url = f"{backend_url}{endpoint}"
 
     print(f"GET request to: {request_url}")
     try:

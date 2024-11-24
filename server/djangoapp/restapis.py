@@ -40,12 +40,19 @@ def analyze_review_sentiments(text):
         print("Network exception occurred")
 
 
-def post_review(data_dict):
-    request_url = backend_url+"/insert_review"
-    try:
-        response = requests.post(request_url, json=data_dict)
-        print(response.json())
-        return response.json()
+from django.http import JsonResponse
+import json
+
+def add_review(request):
+    if request.method == "POST":  # Assuming POST method is required for adding reviews
+        try:
+            data = json.loads(request.body)
+            response = post_review(data)  # Call your function to handle posting the review
+            return JsonResponse({"status": 200, "message": "Review added successfully"})
+        except json.JSONDecodeError:  # Handle JSON parsing errors
+            return JsonResponse({"status": 400, "message": "Invalid JSON format"})
         except Exception as e:  # Catch other unexpected errors
             print(f"Error: {e}")
-
+            return JsonResponse({"status": 401, "message": "Error in posting review"})
+    else:
+        return JsonResponse({"status": 403, "message": "Unauthorized"})

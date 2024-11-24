@@ -48,3 +48,4 @@ def post_review(data_dict):
         return response.json()
         except Exception as e:  # Catch other unexpected errors
             print(f"Error: {e}")
+

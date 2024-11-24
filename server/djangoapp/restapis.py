@@ -70,4 +70,4 @@ def post_review(data_dict):
                 "message": "Invalid JSON response",
                 "data": response.text,
             } except Exception as e:
-    print(f"Error: {e}")
+                print(f"Error: {e}")

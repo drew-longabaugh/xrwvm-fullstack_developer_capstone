@@ -19,7 +19,8 @@ def login_user(request):
             password = data.get('password')
 
             if not username or not password:
-                return JsonResponse({"status": "Error", "message": "Missing 'userName' or 'password'"}, status=400)
+                return JsonResponse({"status": "Error", "message":
+                                     "Missing 'userName' or 'password'"}, status=400)
 
             # Authenticate user
             user = authenticate(username=username, password=password)
@@ -29,7 +30,8 @@ def login_user(request):
                                      "status": "Authenticated"})
             else:
                 return JsonResponse({"status": "Error", "message":
-                                     "Invalid username or password"}, status=401)
+                                     "Invalid username or password"},
+                                    status=401)
         except json.JSONDecodeError:
             logger.error("Invalid JSON format in login_user")
             return JsonResponse({"status": "Error", "message":
@@ -79,7 +81,7 @@ def registration(request):
                                  "Invalid JSON format"}, status=400)
         except Exception as e:
             logger.error(f"Unexpected error in registration: {e}")
-            return JsonResponse({"status": "Error",
-                                 "message": "Internal server error"}, status=500)
+            return JsonResponse({"status":
+                                 "Error", "message": "Internal server error"}, status=500)
     return JsonResponse({"status": "Error", "message":
                          "Only POST method allowed"}, status=405)

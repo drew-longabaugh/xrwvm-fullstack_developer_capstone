@@ -2,7 +2,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const fs = require('fs');
-const  cors = require; ('cors');
+const  cors = require ('cors');
 const app = express();
 const port = 3030;
 app.use(cors());
@@ -26,9 +26,11 @@ try {
     Dealerships.insertMany(dealerships_data.dealerships);
   });
   
-} catch (error) {
+  // Some logic here
+} catch (err) {
   res.status(500).json({ error: 'Error fetching documents' });
 }
+
 
 
 // Express route to home

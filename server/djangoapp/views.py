@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.contrib.auth import authenticate, login
 import logging
 import json
 
@@ -23,14 +24,16 @@ def login_user(request):
                                      "message": "Missing 'userName' or 'password'"}, status=400)
 
             # Authenticate user
-            user = authenticate(username=username, password=password)
+            user = authenticate(username=username,
+                                password=password)
             if user is not None:
                 login(request, user)
                 return JsonResponse({"userName": username,
                                      "status": "Authenticated"})
             else:
                 return JsonResponse({"status": "Error",
-                                     "message": "Invalid username or password"},
+                                     "message":
+                                     "Invalid username or password"},
                                     status=401)
         except json.JSONDecodeError:
             logger.error("Invalid JSON format in login_user")
@@ -83,6 +86,7 @@ def registration(request):
             error_message = f"Unexpected error in registration: {e}"
             logger.error(error_message)
             return JsonResponse({"status":
-                                 "Error", "message": "Internal server error"}, status=500)
+                                 "Error", "message":
+                                 "Internal server error"}, status=500)
     return JsonResponse({"status": "Error", "message":
                          "Only POST method allowed"}, status=405)

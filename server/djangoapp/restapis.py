@@ -42,19 +42,31 @@ def analyze_review_sentiments(text):
         print("Network exception occurred")
 
 
-def add_review(request):
-    if request.method == "POST":
-        # Assuming POST method is required for adding reviews
+def post_review(data_dict):
+    request_url = backend_url + "/insert_review"
+    print("Request URL:", request_url)
+    print("Data being sent:", data_dict)
+
+    try:
+        # Make the POST request with the provided JSON data
+        response = requests.post(request_url, json=data_dict)
+        print("Status Code:", response.status_code)
+
+        # Check if response status code is not successful
+        if response.status_code != 200:
+            print("Error in response:", response.text)
+            return {"status": "error", "message": response.text}
+
+        # Try to parse the response as JSON
         try:
-            data = json.loads(request.body)
-            return JsonResponse({"status": 200, "message":
-                                 "Review added successfully"})
-        except json.JSONDecodeError:  # Handle JSON parsing errors
-            return JsonResponse({"status": 400, "message":
-                                 "Invalid JSON format"})
-        except Exception as e:  # Catch other unexpected errors
-            print(f"Error: {e}")
-            return JsonResponse({"status": 401, "message":
-                                 "Error in posting review"})
-    else:
-        return JsonResponse({"status": 403, "message": "Unauthorized"})
+            response_data = response.json()
+            print("Response Data:", response_data)  # Print the JSON response
+            return response_data
+        except ValueError:
+            # If response isn't JSON, return the text response
+            print("Response is not JSON:", response.text)
+            return {
+                "status": "error",
+                "message": "Invalid JSON response",
+                "data": response.text,
+            }

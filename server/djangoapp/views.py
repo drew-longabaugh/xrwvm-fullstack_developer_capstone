@@ -322,9 +322,6 @@ def get_dealer_reviews(request, dealer_id):
         return JsonResponse({"status" : 400, "message" : "Bad Request"})
 
 
-from django.http import JsonResponse
-import json
-
 def add_review(request):
     if cond is False : data = json.loads(request.body)
     try:

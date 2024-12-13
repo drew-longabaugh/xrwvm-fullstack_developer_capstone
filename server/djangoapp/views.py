@@ -47,53 +47,37 @@ def login_user(request):
 
 
 # Registration view
-@csrf_protect
+@csrf_exempt
 def registration(request):
-    if request.method == "POST":
-        try:
-            # Parse JSON body
-            data = json.loads(request.body)
-            username = data.get('userName')
-            password = data.get('password')
-            first_name = data.get('firstName', '')
-            last_name = data.get('lastName', '')
-            email = data.get('email')
+    context = {}
 
-            # Check for missing fields
-            if not username or not password or not email:
-                return JsonResponse({"status": "Error", "message":
-                                     "Missing required fields"}, status=400)
+    data = json.loads(request.body)
+    username = data['userName']
+    password = data['password']
+    first_name = data['firstName']
+    last_name = data['lastName']
+    email = data['email']
+    username_exist = False
+    email_exist = False
+    try:
+        # Check if user already exists
+        User.objects.get(username=username)
+        username_exist = True
+    except:
+        # If not, simply log this is a new user
+        logger.debug("{} is new user".format(username))
 
-            # Check if username or email already exists
-            if User.objects.filter(username=username).exists():
-                return JsonResponse({"status": "Error", "message":
-                                     "Username already exists"}, status=400)
-            if User.objects.filter(email=email).exists():
-                return JsonResponse({"status": "Error", "message":
-                                     "Email already registered"}, status=400)
-
-            # Create user
-            user = User.objects.create_user(username=username,
-                                            password=password,
-                                            first_name=first_name,
-                                            last_name=last_name,
-                                            email=email)
-            login(request, user)
-            return JsonResponse({"status": "Authenticated",
-                                 "userName": username})
-        except json.JSONDecodeError:
-            logger.error("Invalid JSON format in registration")
-            return JsonResponse({"status": "Error", "message":
-                                 "Invalid JSON format"}, status=400)
-        except Exception as e:
-            error_message = f"Unexpected error in registration: {e}"
-            logger.error(error_message)
-            return JsonResponse({"status":
-                                 "Error", "message":
-                                 "Internal server error"}, status=500)
-    return JsonResponse({"status": "Error", "message":
-                         "Only POST method allowed"}, status=405)
-
+    # If it is a new user
+    if not username_exist:
+        # Create user in auth_user table
+        user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name,password=password, email=email)
+        # Login the user and redirect to list page
+        login(request, user)
+        data = {"userName":username,"status":"Authenticated"}
+        return JsonResponse(data)
+    else :
+        data = {"userName":username,"error":"Already Registered"}
+        return JsonResponse(data)
 
 
 def logout_request(request):

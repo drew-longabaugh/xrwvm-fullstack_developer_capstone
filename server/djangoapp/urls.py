@@ -11,6 +11,9 @@ urlpatterns = [
     # path for login
     path(route='login', view=views.login_user, name='login'),
 
+    #path for cars view
+    path(route='get_cars', view=views.get_cars, name='getcars'),
+    
     # path for dealer reviews view
    path(route='get_dealers', view=views.get_dealerships, name='get_dealers'),
     path(route='get_dealers/<str:state>', 

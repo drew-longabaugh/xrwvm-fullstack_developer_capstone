@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.contrib.auth import authenticate, login
 from .restapis import get_request, analyze_review_sentiments, post_review
+from .models import CarMake, CarModel
+from .populate import initiate
 import logging
 import json
 

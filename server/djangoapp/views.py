@@ -112,13 +112,10 @@ def get_dealerships(request, state="All"):
     endpoint = (
         f"/fetchDealers/{state}" if state != "All" else "/fetchDealers"
     )
-
     dealerships = get_request(endpoint)
     logger.debug(f"Dealerships data received: {dealerships}")
-
     if not dealerships:
         logger.error("No dealerships found or data fetch error.")
-
     return JsonResponse({"status": 200, "dealers": dealerships})
 
 
@@ -133,18 +130,17 @@ def get_dealer_details(request, dealer_id):
 
 
 def get_dealer_reviews(request, dealer_id):
-    """Fetch reviews of a dealer."""
-    if dealer_id:
-        endpoint = f"/fetchReviews/dealer/{dealer_id}"
+    # if dealer id has been provided
+    if(dealer_id):
+        endpoint = "/fetchReviews/dealer/"+str(dealer_id)
         reviews = get_request(endpoint)
-
-        for review in reviews:
-            sentiment = analyze_review_sentiments(review['review'])
-            review['sentiment'] = sentiment['sentiment']
-
-        return JsonResponse({"status": 200, "reviews": reviews})
+        for review_detail in reviews:
+            response = analyze_review_sentiments(review_detail['review'])
+            print(response)
+            review_detail['sentiment'] = response['sentiment']
+        return JsonResponse({"status":200,"reviews":reviews})
     else:
-        return JsonResponse({"status": 400, "message": "Bad Request"})
+        return JsonResponse({"status":400,"message":"Bad Request"})
 
 
 def post_review(data_dict):

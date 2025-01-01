@@ -15,25 +15,20 @@ sentiment_analyzer_url = os.getenv('sentiment_analyzer_url',
 # Function to make GET requests
 def get_request(endpoint, **kwargs):
     params = ""
-    if kwargs:
-        # Format parameters if provided
-        params = "&".join([f"{key}={value}" for key, value in kwargs.items()])
+    if(kwargs):
+        for key,value in kwargs.items():
+            params=params+key+"="+value+"&"
 
-    # Build the complete request URL
-    if params:
-        request_url = f"{backend_url}{endpoint}?{params}"
-    else:
-        request_url = f"{backend_url}{endpoint}"
+    request_url = backend_url+endpoint+"?"+params
 
-    print(f"GET request to: {request_url}")
+    print("GET from {} ".format(request_url))
     try:
-        # Perform GET request
+        # Call get method of requests library with URL and parameters
         response = requests.get(request_url)
-        response.raise_for_status()  # Raise an error for bad status codes
         return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error in GET request: {e}")
-        return {"status": "Error", "message": str(e)}
+    except:
+        # If any error occurs
+        print("Network exception occurred")
 
 def analyze_review_sentiments(text):
     request_url = sentiment_analyzer_url+"analyze/"+text
@@ -44,7 +39,6 @@ def analyze_review_sentiments(text):
     except Exception as err:
         print(f"Unexpected {err=}, {type(err)=}")
         print("Network exception occurred")
-
 
 # Function to analyze sentiment of review text
 def analyze_review_sentiments(text):
@@ -61,25 +55,10 @@ def analyze_review_sentiments(text):
 
 # Function to post a review to the backend
 def post_review(data_dict):
-    request_url = f"{backend_url}/insert_review"
-    print(f"Request URL: {request_url}")
-    print(f"Data being sent: {data_dict}")
-
+    request_url = backend_url+"/insert_review"
     try:
-        # Perform POST request to insert review
-        response = requests.post(request_url, json=data_dict)
-        response.raise_for_status()  # Raise an error for bad status codes
-
-        # Try to parse the response as JSON
-        try:
-            response_data = response.json()
-            print(f"Response Data: {response_data}")
-            return response_data
-        except ValueError:
-            # If the response isn't JSON, return the plain response
-            print(f"Response is not JSON: {response.text}")
-            return {"status": "error", "message": "Invalid JSON response",
-                    "data": response.text}
-    except requests.exceptions.RequestException as e:
-        print(f"Error in POST request: {e}")
-        return {"status": "error", "message": str(e)}
+        response = requests.post(request_url,json=data_dict)
+        print(response.json())
+        return response.json()
+    except:
+        print("Network exception occurred")

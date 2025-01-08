@@ -51,8 +51,6 @@ def login_user(request):
 # Registration view
 @csrf_exempt
 def registration(request):
-    context = {}
-
     data = json.loads(request.body)
     username = data['userName']
     password = data['password']
@@ -60,7 +58,6 @@ def registration(request):
     last_name = data['lastName']
     email = data['email']
     username_exist = False
-    email_exist = False
     try:
         # Check if user already exists
         User.objects.get(username=username)
@@ -73,7 +70,8 @@ def registration(request):
     if not username_exist:
         # Create user in auth_user table
         user = User.objects.create_user(username=username, first_name=first_name,
-                                        last_name=last_name, password=password, email=email)
+                                        last_name=last_name, password=password,
+                                        email=email)
         # Login the user and redirect to list page
         login(request, user)
         data = {"userName": username, "status": "Authenticated"}

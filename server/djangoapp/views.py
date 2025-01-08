@@ -62,16 +62,19 @@ def registration(request):
         # Check if user already exists
         User.objects.get(username=username)
         username_exist = True
-    except:
-        # If not, simply log this is a new user
-        logger.debug("{} is new user".format(username))
+    except Exception as e:
+    # Log any unexpected exceptions
+    logger.error(f"Unexpected error when checking user existence: {e}")
+    username_exist = False  # Default to False in case of any other error
+
 
     # If it is a new user
     if not username_exist:
         # Create user in auth_user table
         user = User.objects.create_user(username=username, 
-                                        first_name=first_name, last_name=last_name, 
-                                        password=password, email=email)
+                                        first_name=first_name,
+                                        last_name=last_name, password=password,
+                                        email=email)
         # Login the user and redirect to list page
         login(request, user)
         data = {"userName": username, "status": "Authenticated"}

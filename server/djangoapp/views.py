@@ -64,8 +64,8 @@ def registration(request):
         username_exist = True
     except Exception as e:
     # Log any unexpected exceptions
-    logger.error(f"Unexpected error when checking user existence: {e}")
-    username_exist = False  # Default to False in case of any other error
+        logger.error(f"Unexpected error when checking user existence: {e}")
+        username_exist = False  # Default to False in case of any other error
 
 
     # If it is a new user

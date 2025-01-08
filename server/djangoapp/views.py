@@ -63,15 +63,14 @@ def registration(request):
         User.objects.get(username=username)
         username_exist = True
     except Exception as e:
-    # Log any unexpected exceptions
+        # Log any unexpected exceptions
         logger.error(f"Unexpected error when checking user existence: {e}")
         username_exist = False  # Default to False in case of any other error
-
 
     # If it is a new user
     if not username_exist:
         # Create user in auth_user table
-        user = User.objects.create_user(username=username, 
+        user = User.objects.create_user(username=username,
                                         first_name=first_name,
                                         last_name=last_name, password=password,
                                         email=email)

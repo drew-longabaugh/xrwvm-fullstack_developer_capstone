@@ -93,7 +93,7 @@ app.get('/fetchDealer/:id', async (req, res) => {
 app.post('/insert_review', express.raw({ type: '*/*' }), async (req, res) => {
   data = JSON.parse(req.body);
   const documents = await Reviews.find().sort( { id: -1 } );
-  	documents[0].getId()
+  	documents[0].getId();
 		review = new Reviews(
     		new_id,
 		data.get("name"), 

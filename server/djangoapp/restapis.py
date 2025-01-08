@@ -44,19 +44,6 @@ def analyze_review_sentiments(text):
         print("Network exception occurred")
 
 
-# Function to analyze sentiment of review text
-def analyze_review_sentiments(text):
-    request_url = f"{sentiment_analyzer_url}analyze/{text}"
-    try:
-        # Perform GET request to sentiment analyzer API
-        response = requests.get(request_url)
-        response.raise_for_status()  # Raise an error for bad status codes
-        return response.json()
-    except requests.exceptions.RequestException as err:
-        print(f"Error in sentiment analysis request: {err}")
-        return {"status": "Error", "message": str(err)}
-
-
 # Function to post a review to the backend
 def post_review(data_dict):
     request_url = backend_url+"/insert_review"
@@ -64,5 +51,6 @@ def post_review(data_dict):
         response = requests.post(request_url, json=data_dict)
         print(response.json())
         return response.json()
-    except Exception as e:
+    except Exception as err:
+        print(f"Unexpected {err=}, {type(err)=}")
         print("Network exception occurred")
